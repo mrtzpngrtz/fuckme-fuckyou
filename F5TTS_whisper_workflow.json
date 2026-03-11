@@ -1,71 +1,74 @@
 {
-  "2": {
-    "inputs": {
-      "audio": [
-        "12",
-        0
-      ]
+    "2": {
+        "inputs": {
+            "audio": [
+                "12",
+                0
+            ]
+        },
+        "class_type": "PreviewAudio",
+        "_meta": {
+            "title": "PreviewAudio"
+        }
     },
-    "class_type": "PreviewAudio",
-    "_meta": {
-      "title": "PreviewAudio"
-    }
-  },
-  "4": {
-    "inputs": {
-      "audio": "untitled.wav"
+    "4": {
+        "inputs": {
+            "audio": "untitled.wav"
+        },
+        "class_type": "LoadAudio",
+        "_meta": {
+            "title": "LoadAudio"
+        }
     },
-    "class_type": "LoadAudio",
-    "_meta": {
-      "title": "LoadAudio"
-    }
-  },
-  "12": {
-    "inputs": {
-      "sample_text": [
-        "13",
-        0
-      ],
-      "speech": "Meta proposes new scalable memory layers that improve knowledge and reduce hallucinations.",
-      "seed": 1761,
-      "model": "F5",
-      "vocoder": "vocos",
-      "speed": 1,
-      "sample_audio": [
-        "4",
-        0
-      ]
+    "12": {
+        "inputs": {
+            "sample_text": [
+                "13",
+                0
+            ],
+            "speech": "",
+            "seed": 0,
+            "model": "F5",
+            "model_type": "F5TTS_Base",
+            "vocoder": "vocos",
+            "speed": 1.0,
+            "sample_audio": [
+                "4",
+                0
+            ]
+        },
+        "class_type": "F5TTSAudioInputs",
+        "_meta": {
+            "title": "F5-TTS Audio from inputs"
+        }
     },
-    "class_type": "F5TTSAudioInputs",
-    "_meta": {
-      "title": "F5-TTS Audio from inputs"
-    }
-  },
-  "13": {
-    "inputs": {
-      "model": "base",
-      "audio": [
-        "4",
-        0
-      ]
+    "13": {
+        "inputs": {
+            "model": "base",
+            "language": "English",
+            "prompt": "",
+            "audio": [
+                "4",
+                0
+            ]
+        },
+        "class_type": "Apply Whisper",
+        "_meta": {
+            "title": "Apply Whisper"
+        }
     },
-    "class_type": "Apply Whisper",
-    "_meta": {
-      "title": "Apply Whisper"
+    "14": {
+        "inputs": {
+            "mode": "raw value",
+            "displaytext": "",
+            "input": [
+                "13",
+                0
+            ]
+        },
+        "class_type": "DisplayAny",
+        "_meta": {
+            "title": "🔧 Display Any"
+        }
     }
-  },
-  "14": {
-    "inputs": {
-      "mode": "raw value",
-      "displaytext": "Meta proposes new scalable memory layers that improve knowledge and reduce hallucinations.",
-      "input": [
-        "13",
-        0
-      ]
-    },
-    "class_type": "DisplayAny",
-    "_meta": {
-      "title": "🔧 Display Any"
-    }
-  }
 }

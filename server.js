@@ -94,14 +94,15 @@ async function requestComfyUI(method, endpoint, data = null, isFormData = false)
 }
 
 // Helper function to make requests to Gemini API
-async function requestGemini(imageBase64, prompt, language) {
+async function requestGemini(imageBase64, prompt, language, mode = 'roast') {
     return new Promise((resolve, reject) => {
         const apiUrl = `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`;
         
         let promptText = prompt;
         if (!promptText) {
-            // Use prompts from config
-            promptText = config.prompts[language] || config.prompts.english;
+            // Use prompts from config based on mode and language
+            const modePrompts = config.prompts[mode] || config.prompts.roast;
+            promptText = modePrompts[language] || modePrompts.english;
         }
         
         const data = JSON.stringify({
@@ -273,6 +274,7 @@ async function handleApiRequest(req, res) {
                             contentType = jsonData.image.split(';')[0].split(':')[1];
                         }
                     } catch (e) {
+                     
                         // Not JSON, assume it's raw image data
                         imageData = buffer;
                         contentType = req.headers['content-type'] || 'image/jpeg';
@@ -289,8 +291,9 @@ async function handleApiRequest(req, res) {
                     // Convert image to base64 for Gemini API
                     const imageBase64 = imageData.toString('base64');
                     
-                    // Get language preference from request
+                    // Get language and mode preference from request
                     let language = 'english';
+                    let mode = 'roast';
                     
                     try {
                         const requestData = buffer.toString();
@@ -299,16 +302,22 @@ async function handleApiRequest(req, res) {
                         if (jsonData && jsonData.language) {
                             language = jsonData.language;
                         }
+                        if (jsonData && jsonData.mode) {
+                            mode = jsonData.mode;
+                        }
                     } catch (e) {
-                        console.error('Error parsing language preference:', e);
+                        console.error('Error parsing request preferences:', e);
                     }
                     
                     // Send to Gemini API
-                    const geminiResponse = await requestGemini(imageBase64, null, language);
+                    const geminiResponse = await requestGemini(imageBase64, null, language, mode);
                     
-                    // Extract the roast text and append suffix in the appropriate language
+                    // Extract the text and append suffix in the appropriate language and mode
                     let roastText = geminiResponse.candidates[0].content.parts[0].text;
-                    const suffix = language === 'german' ? config.responses.german_suffix : config.responses.english_suffix;
+                    
+                    const modeResponses = config.responses[mode] || config.responses.roast;
+                    const suffix = language === 'german' ? modeResponses.german_suffix : modeResponses.english_suffix;
+                    
                     roastText = roastText.trim() + "\n\n" + suffix;
                     
                     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -354,81 +363,39 @@ async function handleApiRequest(req, res) {
                     
                     console.log('Using audio file name for ComfyUI:', audioFile);
                     
-                    // Create workflow based on the JSON
-                    const workflow = {
-                        "2": {
-                            "inputs": {
-                                "audio": [
-                                    "12",
-                                    0
-                                ]
-                            },
-                            "class_type": "PreviewAudio",
-                            "_meta": {
-                                "title": "PreviewAudio"
-                            }
-                        },
-                        "4": {
-                            "inputs": {
-                                "audio": audioFile
-                            },
-                            "class_type": "LoadAudio",
-                            "_meta": {
-                                "title": "LoadAudio"
-                            }
-                        },
-                        "12": {
-                            "inputs": {
-                                "sample_text": [
-                                    "13",
-                                    0
-                                ],
-                                "speech": text,
-                                "seed": Math.floor(Math.random() * 10000),
-                                "model": model,
-                                "model_type": "F5TTS_Base",
-                                "vocoder": config.tts.vocoder,
-                                "speed": config.tts.default_speed,
-                                "sample_audio": [
-                                    "4",
-                                    0
-                                ]
-                            },
-                            "class_type": "F5TTSAudioInputs",
-                            "_meta": {
-                                "title": "F5-TTS Audio from inputs"
-                            }
-                        },
-                        "13": {
-                            "inputs": {
-                                "model": "base",
-                                "language": language === 'german' ? 'German' : 'English',
-                                "prompt": "",
-                                "audio": [
-                                    "4",
-                                    0
-                                ]
-                            },
-                            "class_type": "Apply Whisper",
-                            "_meta": {
-                                "title": "Apply Whisper"
-                            }
-                        },
-                        "14": {
-                            "inputs": {
-                                "mode": "raw value",
-                                "displaytext": text,
-                                "input": [
-                                    "13",
-                                    0
-                                ]
-                            },
-                            "class_type": "DisplayAny",
-                            "_meta": {
-                                "title": "🔧 Display Any"
-                            }
-                        }
-                    };
+                    // Read workflow from JSON file
+                    const workflowPath = path.join(__dirname, 'F5TTS_whisper_workflow.json');
+                    let workflow = {};
+                    try {
+                        const workflowData = fs.readFileSync(workflowPath, 'utf8');
+                        workflow = JSON.parse(workflowData);
+                    } catch (error) {
+                        console.error('Error reading workflow file:', error);
+                        throw new Error('Failed to load ComfyUI workflow template');
+                    }
+                    
+                    // Update the workflow parameters based on the incoming request
+                    if (workflow["4"] && workflow["4"].inputs) {
+                        workflow["4"].inputs.audio = audioFile;
+                    }
+                    
+                    if (workflow["12"] && workflow["12"].inputs) {
+                        workflow["12"].inputs.speech = text;
+                        workflow["12"].inputs.seed = Math.floor(Math.random() * 10000);
+                        workflow["12"].inputs.model = model;
+                        workflow["12"].inputs.model_type = "F5TTS_Base";
+                        workflow["12"].inputs.vocoder = config.tts.vocoder;
+                        workflow["12"].inputs.speed = config.tts.default_speed;
+                    }
+                    
+                    if (workflow["13"] && workflow["13"].inputs) {
+                        workflow["13"].inputs.language = language === 'german' ? 'German' : 'English';
+                        workflow["13"].inputs.prompt = "";
+                    }
+                    
+                    if (workflow["14"] && workflow["14"].inputs) {
+                        workflow["14"].inputs.displaytext = text;
+                    }
                     
                     // Queue prompt
                     const promptData = await requestComfyUI('POST', '/prompt', {

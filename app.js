@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
         console.error('Error loading config:', error);
         config = {
-            prompts: {
+            ui_text: {
                 english: {
                     welcome: "Mirror mirror on the wall, who's the fairest of them all?",
                     recording: "Recording your voice...",
@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // DOM Elements - Pages
     const page1 = document.getElementById('page1');
+    const pageMode = document.getElementById('pageMode');
     const page2 = document.getElementById('page2');
     const page3 = document.getElementById('page3');
     const page4 = document.getElementById('page4');
@@ -64,6 +65,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     // DOM Elements - Language Selection
     const englishBtn = document.getElementById('englishBtn');
     const germanBtn = document.getElementById('germanBtn');
+    
+    // DOM Elements - Mode Selection
+    const roastBtn = document.getElementById('roastBtn');
+    const loveBtn = document.getElementById('loveBtn');
+    
+    // DOM Elements - Welcome Text
+    const welcomeText = document.getElementById('welcomeText');
     
     // DOM Elements - Image
     const webcamBtn = document.getElementById('webcamBtn');
@@ -95,15 +103,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Variables - Language
     let selectedLanguage = ''; // No default language
     
+    // Variables - Mode
+    let selectedMode = 'roast'; // Default to roast
+    
     // Initialize
     checkComfyUIStatus();
     
-    // Start webcam immediately - always visible
-    startWebcam();
+    // Don't start webcam on page 1 - only show language selection
+    // Webcam will start when entering page 3
     
-    // Update play again button text from config
-    if (playAgainBtn && config.prompts.english.playAgain) {
-        playAgainBtn.textContent = config.prompts.english.playAgain;
+    // Update play again button text from config fallback or actual config if present
+    const englishPlayAgainText = config.ui_text ? config.ui_text.english.playAgain : 'PLAY AGAIN';
+    if (playAgainBtn) {
+        playAgainBtn.textContent = englishPlayAgainText;
     }
     
     // Language link event listeners
@@ -114,16 +126,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             englishBtn.classList.add('language-link-selected');
             germanBtn.classList.remove('language-link-selected');
             
-            // Automatically go to next page
+            // Automatically go to mode selection page
             setTimeout(() => {
-                showPage(page2);
-                // Show welcome text
-                if (statusEl) statusEl.textContent = 'Spieglein Spieglein an der Wand wer ist die/der/das schönste im ganzen Land';
-                
-                // Update play again button text
-                if (playAgainBtn) {
-                    playAgainBtn.textContent = 'PLAY AGAIN';
-                }
+                showPage(pageMode);
             }, 300);
         });
     }
@@ -135,16 +140,46 @@ document.addEventListener('DOMContentLoaded', async () => {
             germanBtn.classList.add('language-link-selected');
             englishBtn.classList.remove('language-link-selected');
             
-            // Automatically go to next page
+            // Automatically go to mode selection page
+            setTimeout(() => {
+                showPage(pageMode);
+            }, 300);
+        });
+    }
+    
+    // Mode link event listeners
+    if (roastBtn) {
+        roastBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            selectedMode = 'roast';
+            roastBtn.classList.add('language-link-selected');
+            loveBtn.classList.remove('language-link-selected');
+            
             setTimeout(() => {
                 showPage(page2);
-                // Show welcome text
-                if (statusEl) statusEl.textContent = 'Spieglein Spieglein an der Wand wer ist die/der/das schönste im ganzen Land';
-                
-                // Update play again button text
-                if (playAgainBtn) {
-                    playAgainBtn.textContent = 'ERNEUT ABSPIELEN';
-                }
+                if (welcomeText) welcomeText.textContent = selectedLanguage === 'german' ? 
+                    'Spieglein Spieglein\nan der Wand,\nwer ist die/der/das\nschönste im ganzen Land?' : 
+                    'Mirror mirror on the wall,\nwho\'s the fairest\nof them all?';
+                if (statusEl) statusEl.textContent = '';
+                if (playAgainBtn) playAgainBtn.textContent = selectedLanguage === 'german' ? 'ERNEUT ABSPIELEN' : 'PLAY AGAIN';
+            }, 300);
+        });
+    }
+    
+    if (loveBtn) {
+        loveBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            selectedMode = 'love';
+            loveBtn.classList.add('language-link-selected');
+            roastBtn.classList.remove('language-link-selected');
+            
+            setTimeout(() => {
+                showPage(page2);
+                if (welcomeText) welcomeText.textContent = selectedLanguage === 'german' ? 
+                    'Spieglein Spieglein\nan der Wand,\nwer ist die/der/das\nschönste im ganzen Land?' : 
+                    'Mirror mirror on the wall,\nwho\'s the fairest\nof them all?';
+                if (statusEl) statusEl.textContent = '';
+                if (playAgainBtn) playAgainBtn.textContent = selectedLanguage === 'german' ? 'ERNEUT ABSPIELEN' : 'PLAY AGAIN';
             }, 300);
         });
     }
@@ -153,12 +188,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     function showPage(pageToShow) {
         // Hide all pages
         if (page1) page1.style.display = 'none';
+        if (pageMode) pageMode.style.display = 'none';
         if (page2) page2.style.display = 'none';
         if (page3) page3.style.display = 'none';
         if (page4) page4.style.display = 'none';
         
         // Show the requested page
-        if (pageToShow) pageToShow.style.display = 'block';
+        if (pageToShow) pageToShow.style.display = 'flex';
     }
     
     // Navigation Event Listeners - nextToPage2 removed as it's no longer needed
@@ -381,7 +417,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 resultImagePreview.style.display = 'block';
             }
             
-            // Send the image and language preference to the server for roasting
+            // Send the image, language preference, and mode to the server
             const response = await fetch(`${API_URL}/roast`, {
                 method: 'POST',
                 headers: {
@@ -389,7 +425,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 },
                 body: JSON.stringify({ 
                     image: capturedImage,
-                    language: selectedLanguage
+                    language: selectedLanguage,
+                    mode: selectedMode
                 })
             });
             
@@ -657,6 +694,51 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // If no audio has been generated yet, generate it
                 generateVoiceAndPlay(roastText.textContent.trim());
             }
+        });
+    }
+
+    // Restart Button Handler
+    const restartBtnElement = document.getElementById('restartBtn');
+    if (restartBtnElement) {
+        restartBtnElement.addEventListener('click', () => {
+            // Reset state variables
+            recordedBlob = null;
+            audioChunks = [];
+            capturedImage = null;
+            selectedLanguage = '';
+            selectedMode = 'roast';
+            
+            // Stop any playing audio
+            if (generatedAudio) {
+                generatedAudio.pause();
+                generatedAudio.currentTime = 0;
+                generatedAudio.src = '';
+            }
+            if (sampleAudio) {
+                sampleAudio.pause();
+                sampleAudio.currentTime = 0;
+                sampleAudio.src = '';
+            }
+            
+            // Reset UI states
+            if (minimalProgressBar) minimalProgressBar.style.width = '0%';
+            if (roastText) roastText.textContent = '';
+            if (resultImagePreview) {
+                resultImagePreview.src = '';
+                resultImagePreview.style.display = 'none';
+            }
+            
+            // Remove selection classes
+            if (englishBtn) englishBtn.classList.remove('language-link-selected');
+            if (germanBtn) germanBtn.classList.remove('language-link-selected');
+            if (roastBtn) roastBtn.classList.add('language-link-selected'); // default
+            if (loveBtn) loveBtn.classList.remove('language-link-selected');
+            
+            // Clear status
+            if (statusEl) statusEl.textContent = '';
+            
+            // Navigate back to page 1
+            showPage(page1);
         });
     }
     

@@ -150,21 +150,26 @@ textarea {
 }
 
 .copyable-text {
-    width: 300px;
+    width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
     background-color: rgba(0, 0, 0, 0.7);
     color: #fff;
     font-family: Helvetica, Arial, sans-serif;
-    font-size: 1rem;
+    font-size: 1.2rem;
+    font-weight: 300;
     margin: 0;
-    padding: 15px;
-    text-align: left;
+    padding: 30px;
+    text-align: center;
     white-space: pre-wrap;
     cursor: text;
     user-select: all;
-    line-height: 1.5;
+    line-height: 1.8;
+    letter-spacing: 0.5px;
     position: fixed;
-    bottom: 100px;
-    left: 20px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     z-index: 100;
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -176,32 +181,54 @@ textarea {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 360px;
-    height: 640px;
+    width: 540px;
+    height: 960px;
     margin: 0;
     padding: 0;
     z-index: 1;
 }
 
-/* Result image - same size as webcam preview */
+/* Result image - bigger size */
 .result-image {
-    width: 360px;
-    height: 640px;
+    width: 540px;
+    height: 960px;
     object-fit: cover;
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Updated status text - much bigger and centered */
+/* Updated status text - hidden by default, used for errors only */
 .status {
     margin: 0 0 30px 0;
     padding: 20px;
-    font-size: 4rem;
+    font-size: 1rem;
     text-align: center;
     width: 100%;
     line-height: 1.4;
-    font-weight: 700;
+    font-weight: 400;
     position: relative;
     z-index: 100;
+}
+
+/* Welcome text - centered poem layout */
+.welcome-text-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+    z-index: 100;
+}
+
+.welcome-text {
+    font-size: 2.5rem;
+    font-weight: 300;
+    line-height: 1.6;
+    text-align: center;
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+    white-space: pre-line;
+    letter-spacing: 1px;
 }
 
 .recording {
@@ -279,11 +306,12 @@ audio {
 
 /* Minimal audio player styles */
 .minimal-player {
-    width: 300px;
+    width: 540px;
     padding: 10px 0;
     position: fixed;
     bottom: 70px;
-    left: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 100;
 }
 
@@ -369,9 +397,9 @@ audio {
 
 
 #webcam {
-    display: block;
-    width: 360px;
-    height: 640px;
+    display: none;
+    width: 540px;
+    height: 960px;
     object-fit: cover;
     position: fixed;
     top: 50%;
@@ -439,10 +467,7 @@ audio {
     width: 100%;
     max-width: 600px;
     justify-content: center;
-    position: fixed;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
+    align-items: center;
     z-index: 100;
 }
 
@@ -467,13 +492,50 @@ audio {
     border-bottom: 2px solid #fff;
 }
 
+/* Mode links specific styles */
+.mode-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    border-bottom: none !important;
+}
+
+.mode-link:hover {
+    border-bottom: none !important;
+}
+
+.mode-link-selected {
+    color: #fff;
+}
+
+.mode-icon {
+    width: 60px;
+    height: 60px;
+    fill: #fff;
+    transition: all 0.2s;
+    opacity: 0.7;
+}
+
+.mode-link:hover .mode-icon {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.language-link-selected.mode-link .mode-icon {
+    opacity: 1;
+    fill: #fff;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+}
+
 .output-section {
     margin: 0;
     padding: 0;
-    width: 300px;
+    width: 500px;
     position: fixed;
-    bottom: 100px;
-    left: 20px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     z-index: 100;
 }
 
@@ -483,18 +545,30 @@ audio {
 }
 
 .audio-row {
-    width: 300px;
+    width: 540px;
     margin: 0;
     padding: 0;
     position: fixed;
     bottom: 70px;
-    left: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 100;
 }
 
 .full-width-audio {
     width: 100%;
     height: 50px;
+}
+
+.action-buttons-container {
+    display: flex;
+    gap: 10px;
+    width: 540px;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
 }
 
 .speak-btn {
@@ -504,18 +578,24 @@ audio {
     border-radius: 4px;
     font-size: 0.9rem;
     padding: 10px 15px;
-    width: 300px;
+    flex: 1;
     margin: 0;
     text-transform: uppercase;
     font-weight: 700;
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    z-index: 100;
 }
 
 .speak-btn:hover {
     background-color: #f0f0f0;
+}
+
+.secondary-btn {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.secondary-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
 }
 
 .record-button-container {
@@ -523,10 +603,9 @@ audio {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin: 20px 0;
+    margin: 0;
     position: relative;
     z-index: 100;
-    min-height: 400px; /* Ensure consistent height even when progress appears */
 }
 
 .audio-preview {
