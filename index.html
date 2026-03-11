@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FUCKME/FUCKYOU</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="logo">
+        <h1>FUCKME/FUCKYOU</h1>
+    </div>
+    
+    <!-- Global webcam - always visible -->
+    <video id="webcam" autoplay playsinline muted></video>
+    
+    <div class="container">
+        <div class="status" id="status"></div>
+        
+        <!-- Page 1: Language Selection -->
+        <div class="page" id="page1">
+            <div class="section">
+                <!-- Language Selection with text links -->
+                <div class="language-links">
+                    <a href="#" id="englishBtn" class="language-link">ENGLISH</a>
+                    <a href="#" id="germanBtn" class="language-link">DEUTSCH</a>
+                </div>
+                
+                <!-- Next button removed as per request -->
+            </div>
+        </div>
+        
+        <!-- Page 2: Record Voice -->
+        <div class="page" id="page2" style="display: none;">
+            <div class="section">
+                <!-- Large white record button -->
+                <div class="record-button-container">
+                    <button id="recordBtn" class="record-btn">START</button>
+                    <div class="progress-container" id="recordingProgress" style="display: none;">
+                        <div class="progress-bar" id="recordingProgressBar"></div>
+                        <div class="progress-text" id="recordingProgressText">0s</div>
+                    </div>
+                </div>
+                
+                <!-- Hidden audio element for storing the recorded audio (controls removed) -->
+                <div class="audio-preview" style="display: none;">
+                    <audio id="sampleAudio"></audio>
+                </div>
+                
+                <!-- Next button removed as per request -->
+            </div>
+        </div>
+        
+        <!-- Page 3: Webcam Image Capture with Countdown -->
+        <div class="page" id="page3" style="display: none;">
+            <div class="section">
+                <div class="image-capture-container">
+                    <!-- Webcam container (uses global webcam) -->
+                    <div class="webcam-container">
+                    </div>
+                    
+                    <div class="preview-container">
+                        <img id="imagePreview" class="media-preview">
+                    </div>
+                    <!-- Countdown overlay - positioned in the center of the screen -->
+                    <div id="countdown" class="countdown-overlay" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; font-size: 12rem; color: white; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; text-align: center;">5</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Page 4: Output (Roast and Generated Voice) -->
+        <div class="page" id="page4" style="display: none;">
+            <div class="section">
+                <div class="progress-container" id="roastingProgress" style="display: none;">
+                    <div class="progress-bar" id="roastingProgressBar"></div>
+                    <div class="progress-text">Analyzing image...</div>
+                </div>
+                
+                <!-- Image preview -->
+                <div class="result-image-container">
+                    <img id="resultImagePreview" class="result-image">
+                </div>
+                
+                <!-- Output section as copyable text -->
+                <div class="output-section">
+                    <p id="roastText" class="copyable-text"></p>
+                </div>
+                
+                <!-- Minimal audio player -->
+                <div class="audio-row">
+                    <div class="minimal-player">
+                        <div class="minimal-progress-container">
+                            <div class="minimal-progress-bar" id="minimalProgressBar"></div>
+                        </div>
+                        <audio id="generatedAudio" style="display: none;"></audio>
+                    </div>
+                </div>
+                
+                <!-- Play Again button -->
+                <button id="playAgainBtn" class="speak-btn">PLAY AGAIN</button>
+                <div class="progress-container" id="generatingProgress" style="display: none;">
+                    <div class="progress-bar" id="generatingProgressBar"></div>
+                    <div class="progress-text">Processing...</div>
+                </div>
+                
+                <!-- Navigation buttons removed as per request -->
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
